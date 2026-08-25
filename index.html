@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E.Layer App</title>
+<style>
+:root{
+  --gold:#c9a24b; --gold-dark:#a1802f; --plum:#2c1e2f; --plum-2:#3d2a3f;
+  --cream:#faf6f0; --card:#ffffff; --border:#ece3d6; --text:#241a1e; --muted:#7d716c;
+  --success:#3f7d4f; --danger:#b5532c;
+}
+*{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+body{font-family:'Segoe UI',Arial,sans-serif; background:#e8e2da; display:flex; justify-content:center; padding:20px 0;}
+h1,h2,h3{font-family:Georgia,serif; font-weight:500;}
+.phone{width:390px; max-width:100vw; background:var(--cream); border-radius:36px; overflow:hidden; box-shadow:0 20px 50px rgba(0,0,0,0.25); border:8px solid #1b1418; position:relative; min-height:820px; display:flex; flex-direction:column;}
+.statusbar{height:26px; background:var(--plum); color:#fff; font-size:11px; display:flex; justify-content:space-between; align-items:center; padding:0 22px;}
+.topbar{background:var(--plum); color:#fff; padding:14px 18px 18px; display:flex; justify-content:space-between; align-items:center;}
+.topbar .greet .small{font-size:11px; color:#c9bccb;}
+.topbar .greet .name{font-size:18px; font-family:Georgia,serif;}
+.bell{position:relative; cursor:pointer;}
+.bell .dot{position:absolute; top:-2px; right:-2px; width:8px; height:8px; background:var(--gold); border-radius:50%;}
+.screen{flex:1; overflow-y:auto; padding:16px 16px 90px;}
+.screen::-webkit-scrollbar{display:none;}
+.card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:14px;}
+.pts-card{background:linear-gradient(135deg,#2c1e2f,#4a3350); color:#fff; border-radius:14px; padding:18px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center;}
+.pts-card .n{font-size:26px; font-weight:600;}
+.pts-card .l{font-size:11px; color:#d7cdd9;}
+.btn{display:inline-block; background:var(--gold); color:var(--plum); padding:10px 18px; font-size:13px; border:none; border-radius:8px; cursor:pointer; font-weight:600;}
+.btn.block{width:100%; text-align:center;}
+.btn.dark{background:var(--plum); color:#fff;}
+.btn.outline{background:transparent; border:1px solid var(--gold-dark); color:var(--gold-dark);}
+.btn.sm{padding:7px 12px; font-size:12px;}
+.qa-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;}
+.qa{background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px; text-align:center; font-size:12px; cursor:pointer;}
+.qa .ic{font-size:22px; margin-bottom:6px;}
+.sec-title{font-size:14px; font-weight:600; margin:4px 0 10px;}
+label{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.4px; display:block; margin-bottom:4px;}
+select,input{width:100%; padding:10px 11px; border:1px solid var(--border); border-radius:8px; font-size:14px; margin-bottom:12px; background:#fff; font-family:inherit;}
+.svc-row{display:flex; gap:10px; align-items:center; border-bottom:1px solid var(--border); padding:10px 0;}
+.svc-row:last-child{border-bottom:none;}
+.svc-row img{width:52px; height:52px; border-radius:8px; object-fit:cover;}
+.svc-row .info{flex:1;}
+.svc-row .info h4{font-size:13px; font-weight:600;}
+.svc-row .info p{font-size:11px; color:var(--muted);}
+.svc-row .price{font-size:13px; font-weight:600; color:var(--gold-dark);}
+.stylist-card{display:flex; gap:12px; align-items:flex-start; padding:12px 0; border-bottom:1px solid var(--border);}
+.stylist-card:last-child{border-bottom:none;}
+.stylist-card img{width:56px; height:56px; border-radius:50%; object-fit:cover;}
+.stylist-card .stars{color:var(--gold); font-size:12px;}
+.review{font-size:11px; color:var(--muted); margin-top:4px; font-style:italic;}
+.tabbar{position:absolute; bottom:0; left:0; right:0; background:#fff; border-top:1px solid var(--border); display:flex; padding:8px 0 14px; z-index:20;}
+.tab{flex:1; text-align:center; font-size:10px; color:var(--muted); cursor:pointer;}
+.tab .ic{font-size:19px; display:block; margin-bottom:2px;}
+.tab.active{color:var(--gold-dark); font-weight:600;}
+.hidden{display:none !important;}
+.pill{display:inline-block; padding:5px 12px; border-radius:14px; background:var(--border); font-size:11px; margin-right:6px; margin-bottom:6px; cursor:pointer;}
+.pill.active{background:var(--plum); color:#fff;}
+.voucher{display:flex; justify-content:space-between; align-items:center; padding:12px; border:1px solid var(--border); border-radius:10px; margin-bottom:10px;}
+.cam-frame{background:#000; border-radius:14px; aspect-ratio:3/4; display:flex; align-items:center; justify-content:center; overflow:hidden; position:relative; margin-bottom:14px;}
+.cam-frame img{width:100%; height:100%; object-fit:cover; transition:filter .6s;}
+.cam-overlay{position:absolute; bottom:10px; left:10px; right:10px; background:rgba(0,0,0,0.6); color:#fff; font-size:11px; padding:10px 12px; border-radius:8px; display:none;}
+.cam-overlay.show{display:block;}
+.cam-overlay .metric-row{display:flex; justify-content:space-between; margin-bottom:3px;}
+.swatch{width:30px; height:30px; border-radius:50%; display:inline-block; margin-right:8px; cursor:pointer; border:2px solid transparent;}
+.swatch.active{border-color:var(--plum); transform:scale(1.1);}
+.calc-row{display:flex; justify-content:space-between; align-items:center; padding:8px 0; font-size:13px; border-bottom:1px solid var(--border);}
+.calc-total{display:flex; justify-content:space-between; font-size:16px; font-weight:600; padding-top:10px;}
+.toast{position:fixed; bottom:100px; left:50%; transform:translateX(-50%); background:var(--plum); color:#fff; padding:10px 18px; border-radius:20px; font-size:12px; opacity:0; transition:opacity .3s; z-index:100;}
+.toast.show{opacity:1;}
+.notif-item{display:flex; gap:10px; padding:10px 0; border-bottom:1px solid var(--border); font-size:12px;}
+.notif-item:last-child{border-bottom:none;}
+.notif-item .ic{font-size:16px; color:var(--gold-dark);}
+.toggle{width:40px; height:22px; background:var(--border); border-radius:12px; position:relative; cursor:pointer; display:inline-block; flex-shrink:0;}
+.toggle.on{background:var(--gold);}
+.toggle .dot{width:18px; height:18px; background:#fff; border-radius:50%; position:absolute; top:2px; left:2px; transition:left .2s;}
+.toggle.on .dot{left:20px;}
+.back-row{display:flex; align-items:center; gap:10px; margin-bottom:14px; cursor:pointer;}
+.back-row .arrow{font-size:18px;}
+.back-row .title{font-size:16px; font-weight:600; font-family:Georgia,serif;}
+.stamp-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px;}
+.stamp{border:2px dashed var(--border); border-radius:12px; padding:14px 6px; text-align:center; font-size:11px; color:var(--muted);}
+.stamp.done{border:2px solid var(--gold); background:#fbf3e3; color:var(--gold-dark); font-weight:600;}
+.stamp .ic{font-size:22px; display:block; margin-bottom:6px;}
+.timeline{position:relative; padding-left:20px; border-left:2px solid var(--border);}
+.tl-item{position:relative; margin-bottom:18px;}
+.tl-item::before{content:''; position:absolute; left:-25px; top:2px; width:10px; height:10px; border-radius:50%; background:var(--gold);}
+.tl-date{font-size:11px; color:var(--gold-dark); font-weight:600;}
+.tl-title{font-size:13px; font-weight:600; margin:2px 0;}
+.tl-note{font-size:11px; color:var(--muted);}
+.ref-code{background:var(--plum); color:#fff; text-align:center; padding:16px; border-radius:10px; font-size:20px; letter-spacing:3px; font-weight:600; margin-bottom:12px;}
+.deal-card{background:linear-gradient(135deg,#a1802f,#c9a24b); color:#fff; border-radius:14px; padding:18px; margin-bottom:14px;}
+.deal-card .big{font-size:22px; font-weight:600;}
+.feed-post{border-bottom:1px solid var(--border); padding:12px 0;}
+.feed-post img{width:100%; border-radius:10px; margin:8px 0; aspect-ratio:4/3; object-fit:cover;}
+.feed-actions{display:flex; gap:16px; font-size:12px; color:var(--muted); align-items:center;}
+.feed-actions .liked{color:var(--danger); font-weight:600;}
+.wait-row{display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--border); font-size:13px;}
+.streak-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:6px; margin-bottom:8px;}
+.streak-day{text-align:center; font-size:10px; color:var(--muted); border:1px solid var(--border); border-radius:8px; padding:8px 2px;}
+.streak-day.done{background:var(--gold); color:var(--plum); border-color:var(--gold); font-weight:600;}
+.streak-day.today{border-color:var(--plum); border-width:2px;}
+.map-embed{width:100%; height:160px; border:0; border-radius:10px; margin-bottom:10px;}
+.addr-row{display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:6px;}
+.progress-bar{height:6px; background:var(--border); border-radius:4px; margin-bottom:16px; overflow:hidden;}
+.progress-fill{height:100%; background:var(--gold);}
+.cat-tile{background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px; text-align:center; cursor:pointer;}
+.cat-tile .ic{font-size:26px; margin-bottom:6px;}
+.opt-row{padding:12px 14px; border:1px solid var(--border); border-radius:10px; margin-bottom:8px; font-size:13px; cursor:pointer;}
+.star-select span{font-size:22px; color:var(--border); cursor:pointer;}
+.star-select span.on{color:var(--gold);}
+.metric-tile{background:#f6f1ec; border-radius:10px; padding:12px; text-align:center;}
+.metric-tile .n{font-size:18px; font-weight:600; color:var(--plum);}
+.metric-tile .l{font-size:10px; color:var(--muted); margin-top:2px;}
+.bar-row{display:flex; align-items:center; gap:8px; margin-bottom:8px; font-size:12px;}
+.bar-track{flex:1; height:8px; background:var(--border); border-radius:4px; overflow:hidden;}
+.bar-fill{height:100%; background:var(--gold-dark);}
+.low{color:var(--danger); font-weight:600;}
+.ok{color:var(--success);}
+table{width:100%; border-collapse:collapse; font-size:12px;}
+th,td{text-align:left; padding:7px 6px; border-bottom:1px solid var(--border);}
+th{color:var(--muted); font-weight:500; font-size:10px; text-transform:uppercase;}
+.mission-bar{display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:12px;}
+.match3-grid{display:grid; grid-template-columns:repeat(6,1fr); gap:5px; margin-bottom:14px; user-select:none;}
+.tile{aspect-ratio:1; background:#fff; border:1px solid var(--border); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:20px; cursor:grab; touch-action:none; transition:transform .1s;}
+.tile.dragging{transform:scale(0.92); box-shadow:0 0 0 2px var(--gold) inset;}
+.match-counts{display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin-bottom:10px; text-align:center;}
+.match-counts div{font-size:10px; color:var(--muted);}
+.match-counts .cnt{font-size:14px; font-weight:600; color:var(--plum); display:block;}
+.ai-recbox{background:linear-gradient(135deg,#2c1e2f,#4a3350); color:#fff; border-radius:12px; padding:16px; margin-top:14px;}
+.ai-recbox p{font-size:12px; line-height:1.6;}
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="statusbar"><span>9:41</span><span>E.Layer</span><span>100%</span></div>
+  <div class="topbar">
+    <div class="greet"><div class="small" id="greetTime">Good afternoon</div><div class="name">Emily</div></div>
+    <div class="bell" onclick="goTab('profile')"><span style="font-size:20px;">&#128276;</span><span class="dot"></span></div>
+  </div>
+
+  <div class="screen" id="screen-home"></div>
+  <div class="screen hidden" id="screen-book"></div>
+  <div class="screen hidden" id="screen-rewards"></div>
+  <div class="screen hidden" id="screen-match3"></div>
+  <div class="screen hidden" id="screen-camera"></div>
+  <div class="screen hidden" id="screen-profile"></div>
+  <div class="screen hidden" id="screen-extra"></div>
+  <div class="screen hidden" id="screen-owner"></div>
+  <div class="screen hidden" id="screen-copilot"></div>
+
+  <div class="tabbar">
+    <div class="tab active" data-t="home" onclick="goTab('home')"><span class="ic">&#127968;</span>Home</div>
+    <div class="tab" data-t="book" onclick="goTab('book')"><span class="ic">&#128197;</span>Book</div>
+    <div class="tab" data-t="rewards" onclick="goTab('rewards')"><span class="ic">&#127873;</span>Rewards</div>
+    <div class="tab" data-t="camera" onclick="goTab('camera')"><span class="ic">&#128247;</span>Try-on</div>
+    <div class="tab" data-t="profile" onclick="goTab('profile')"><span class="ic">&#128100;</span>Profile</div>
+  </div>
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+function load(k,f){const v=localStorage.getItem(k); return v?JSON.parse(v):f;}
+function save(k,v){localStorage.setItem(k, JSON.stringify(v));}
+function toast(m){const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200);}
+
+const SHOP_ADDRESS = "Blk 326 Woodlands Street 32 #01-107, Singapore";
+const STAFF_PASSWORD = "owner123";
+
+const SERVICES = [
+  {id:'s1',cat:'Hair',name:'Hair Colour',price:128,dur:90,desc:'Full colour with gloss finish.',img:'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=200&q=80'},
+  {id:'s2',cat:'Hair',name:'Haircut & Style',price:58,dur:50,desc:'Precision cut with blow-dry.',img:'https://images.unsplash.com/photo-1522337660859-02fbefca4702?w=200&q=80'},
+  {id:'s3',cat:'Nails',name:'Gel Manicure',price:45,dur:45,desc:'Shape, cuticle care, gel polish.',img:'https://images.unsplash.com/photo-1604654894610-df63bc536371?w=200&q=80'},
+  {id:'s4',cat:'Facial',name:'Hydrating Facial',price:88,dur:60,desc:'Cleanse, exfoliate, hydration mask.',img:'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=200&q=80'},
+  {id:'s5',cat:'Spa',name:'Aromatherapy Massage',price:110,dur:75,desc:'Full body relaxation massage.',img:'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=200&q=80'},
+  {id:'s6',cat:'Hair',name:'Keratin Treatment',price:150,dur:120,desc:'Smoothing treatment, reduces frizz.',img:'https://images.unsplash.com/photo-1522337660859-02fbefca4702?w=200&q=80'}
+];
+const ADDONS = [
+  {id:'a1', name:'Deep conditioning treatment', price:22},
+  {id:'a2', name:'Paraffin hand dip', price:15},
+  {id:'a3', name:'Scalp massage upgrade', price:18}
+];
+const STYLISTS = [
+  {name:'Jessica', specialty:'Colour specialist', rating:4.9, img:'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&q=80', reviews:['Best balayage in the city.','Always listens to what I actually want.']},
+  {name:'Marcus', specialty:'Cuts & styling', rating:4.8, img:'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=200&q=80', reviews:['Fast, precise, great conversation.','My go-to for a fresh cut.']},
+  {name:'Priya', specialty:'Facials & spa', rating:4.9, img:'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&q=80', reviews:['So relaxing, I always fall asleep.','My skin has never looked better.']}
+];
+const NAIL_COLOURS = [{n:'Classic red', h:'#a5342f'},{n:'Nude', h:'#d9b99b'},{n:'Blush pink', h:'#e7a9b6'},{n:'Deep plum', h:'#4a2440'}];
+const HAIR_COLOURS = [{n:'Chestnut', h:'#5b3a29'},{n:'Ash blonde', h:'#c9b79c'},{n:'Copper', h:'#a5502b'},{n:'Jet black', h:'#1c1c1c'},{n:'Rose gold', h:'#b76e79'}];
+const PASSPORT_STAMPS = [
+  {key:'Haircut', ic:'&#9986;'}, {key:'Hair Colour', ic:'&#127801;'}, {key:'Facial', ic:'&#10024;'},
+  {key:'Spa', ic:'&#128167;'}, {key:'Manicure', ic:'&#128131;'}, {key:'Brow Shaping', ic:'&#128064;'}
+];
+const JOURNEY = [
+  {date:'Jan', title:'Hair Colour', note:'Base colour applied, gloss finish.'},
+  {date:'Mar', title:'Hair Treatment', note:'Deep conditioning to repair colour damage.'},
+  {date:'May', title:'Keratin Treatment', note:'Smoothing treatment, reduced frizz.'},
+  {date:'Aug', title:'Healthy Hair Score Improved', note:'Follow-up scan showed higher hydration.'}
+];
+const FEED_POSTS = [
+  {name:'Emily R.', img:'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=400&q=80', caption:'New balayage courtesy of Jessica!', likes:24, liked:false},
+  {name:'Daniel K.', img:'https://images.unsplash.com/photo-1604654894610-df63bc536371?w=400&q=80', caption:'Nail art for the weekend.', likes:16, liked:false},
+  {name:'Priya S.', img:'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=400&q=80', caption:'Post-facial glow is real.', likes:31, liked:false}
+];
+const WAITLIST_SLOTS = [
+  {service:'Hair Colour', time:'Today, 4:00 PM', full:true},
+  {service:'Hydrating Facial', time:'Tomorrow, 11:00 AM', full:true},
+  {service:'Gel Manicure', time:'Tomorrow, 2:00 PM', full:false}
+];
+
+const CONSULT = {
+  hair: [
+    {q:'What is your biggest hair concern?', key:'concern', opts:['Hair loss','Dry hair','Frizzy hair','Oily scalp','Split ends','Dandruff','Damaged hair','Lack of volume','Colour fading','No major concerns']},
+    {q:'How would you describe your hair texture?', key:'texture', opts:['Straight','Wavy','Curly','Coily']},
+    {q:'How thick is your hair?', key:'thickness', opts:['Fine','Medium','Thick']},
+    {q:'How often do you wash your hair?', key:'wash', opts:['Every day','Every 2–3 days','Once a week','Only when needed']},
+    {q:'Have you chemically treated your hair?', key:'chem', opts:['Never','Hair colouring','Bleaching','Perm','Rebonding','Keratin treatment']},
+    {q:'How often do you use heat styling?', key:'heat', opts:['Every day','A few times a week','Occasionally','Never']},
+    {q:'What is your hair goal?', key:'goal', opts:['Healthier hair','Shinier hair','Longer hair','Smooth hair','More volume','New hairstyle','New colour']}
+  ],
+  skin: [
+    {q:'What is your skin type?', key:'type', opts:['Oily','Dry','Combination','Sensitive','Normal']},
+    {q:'What concerns you most?', key:'concern', opts:['Acne','Acne scars','Pigmentation','Dryness','Wrinkles','Large pores','Dull skin','Redness']},
+    {q:'How often do you do facial treatments?', key:'freq', opts:['Monthly','Every few months','Rarely','Never']},
+    {q:'Do you usually wear makeup?', key:'makeup', opts:['Every day','Occasionally','Rarely','Never']},
+    {q:'What is your skincare goal?', key:'goal', opts:['Brighter skin','Hydration','Anti-aging','Clear acne','Relaxation','Deep cleansing']}
+  ],
+  nail: [
+    {q:'What are your nail goals?', key:'goal', opts:['Stronger nails','Nail extensions','Nail art','Healthy nails','Simple manicure']},
+    {q:'Do your nails break easily?', key:'break', opts:['Yes','Sometimes','No']},
+    {q:'How often do you get your nails done?', key:'freq', opts:['Every month','Every few months','Rarely','Never']},
+    {q:'Preferred style?', key:'style', opts:['Minimalist','Elegant','Cute','Trendy','Luxury']}
+  ],
+  spa: [
+    {q:'Why are you visiting today?', key:'reason', opts:['Stress relief','Muscle pain','Relaxation','Self-care','Special occasion']},
+    {q:'Which areas feel tense?', key:'area', opts:['Neck','Shoulders','Back','Legs','Whole body']},
+    {q:'Preferred massage pressure?', key:'pressure', opts:['Gentle','Medium','Strong']}
+  ]
+};
+const LIFESTYLE = [
+  {q:'How often do you exercise?', key:'exercise', opts:['Daily','Weekly','Rarely','Never']},
+  {q:'Do you spend long hours outdoors?', key:'outdoors', opts:['Yes','Sometimes','Rarely']},
+  {q:'How many hours do you sleep?', key:'sleep', opts:['Less than 5','5–7','7–9','More than 9']},
+  {q:'Do you have any allergies?', key:'allergy', opts:['Hair dye','Fragrance','Essential oils','None']}
+];
+const STRESS_Q = {q:'How stressed have you felt recently?', key:'stress'};
+
+const HAIR_REC = {
+  'Hair loss':'Scalp Treatment + Hair Strengthening Treatment', 'Dry hair':'Hydrating Hair Treatment',
+  'Frizzy hair':'Keratin Treatment', 'Oily scalp':'Clarifying Scalp Treatment', 'Split ends':'Trim + Deep Conditioning',
+  'Dandruff':'Scalp Treatment', 'Damaged hair':'Keratin Treatment + Deep Conditioning', 'Lack of volume':'Volumising Treatment',
+  'Colour fading':'Hair Colour Touch-up + Gloss', 'No major concerns':'Maintenance Trim'
+};
+const SKIN_REC = {
+  'Acne':'Clarifying Facial', 'Acne scars':'Hydrating Facial + gentle exfoliation', 'Pigmentation':'Brightening Facial',
+  'Dryness':'Hydrating Facial', 'Wrinkles':'Anti-aging Facial', 'Large pores':'Deep Cleansing Facial',
+  'Dull skin':'Brightening Facial', 'Redness':'Calming Facial'
+};
+const NAIL_REC = {
+  'Stronger nails':'Gel Manicure + strengthening treatment', 'Nail extensions':'Nail Art Extension', 'Nail art':'Nail Art Extension',
+  'Healthy nails':'Gel Manicure', 'Simple manicure':'Gel Manicure'
+};
+const SPA_REC = {
+  'Stress relief':'Aromatherapy Massage', 'Muscle pain':'Deep Tissue Massage', 'Relaxation':'Aromatherapy Massage',
+  'Self-care':'Aromatherapy Massage', 'Special occasion':'Spa Package'
+};
+
+const COPILOT_DATA = {
+  briefing:{completed:42, revenueChange:12, topService:'Nail services', churnCount:2, flashSuggestion:'2–4 PM because bookings are low', lowStock:'facial masks — may run out in 3 days', reviewFlag:'three recent reviews mention long waiting times', trend:'chrome nail designs, trending +40% this week', loyalCount:5},
+  health:{overall:91, breakdown:[['Customer satisfaction',95],['Revenue',88],['Bookings',93],['Retention',82],['Marketing',75],['Inventory',90]], weakest:'Marketing'},
+  churnList:[
+    {name:'Sarah', pct:87, reason:'No visit for 4 months, usually books every 6 weeks', action:'Send a birthday voucher'},
+    {name:'Wei Ling', pct:74, reason:'No visit for 3 months, previously monthly', action:'Offer a Hair Spa Package'}
+  ],
+  revenueForecast:{current:18000, predicted:21300, confidence:87, reason:'Seasonal promotion, historical trends, and stronger weekend bookings'},
+  reviews:{total:300, positive:92, posThemes:['Friendly staff','Clean environment','Great massage'], negThemes:['Waiting time','Difficult parking'], action:'Improve appointment scheduling'},
+  trends:[{item:'Chrome nails', change:'+40%'},{item:'Copper hair tones', change:'+22%'},{item:'Scalp treatments', change:'+15%'}]
+};
+
+let customer = load('el_customer', {name:'Emily', points:640, membership:'Gold', referralCode:'EMILY20'});
+let bookings = load('el_bookings', [{service:'Hair Colour', staff:'Jessica', date:'tomorrow', time:'2:00 PM', price:128, status:'Confirmed'}]);
+let notifSettings = load('el_notif', {reminders:true, promos:true});
+let passportStamps = load('el_passport', {'Hair Colour':true,'Facial':true,'Manicure':true});
+let waitlisted = load('el_waitlist', []);
+let feedState = load('el_feed', FEED_POSTS);
+let streak = load('el_streak', {days:[true,true,true,false,false,false,false]});
+let inventory = load('el_inventory', [
+  {item:'Shampoo', stock:24, min:10}, {item:'Hair Dye - Blonde', stock:6, min:8},
+  {item:'Facial Mask', stock:15, min:10}, {item:'Gel Polish - Red', stock:3, min:8},
+  {item:'Keratin Solution', stock:9, min:6}
+]);
+let matchStats = load('el_matchstats', {'hairdryer':0,'lipstick':0,'polish':0,'shampoo':0,'mask':0});
+let selectedAddons = [];
+let consultCategory = null, consultAnswers = {}, consultSteps = [], consultStep = 0;
+let staffLoggedIn = false;
+
+function goTab(t){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
+  document.getElementById('screen-'+t).classList.remove('hidden');
+  document.querySelectorAll('.tab').forEach(el=>el.classList.toggle('active', el.dataset.t===t));
+  if(t==='home') renderHome();
+  if(t==='book') renderBook();
+  if(t==='rewards') renderRewards();
+  if(t==='camera') renderCamera();
+  if(t==='profile') renderProfile();
+}
+function openExtra(which){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
+  document.getElementById('screen-extra').classList.remove('hidden');
+  document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));
+  renderExtra(which);
+}
+function openOwner(){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
+  document.getElementById('screen-owner').classList.remove('hidden');
+  document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));
+  renderOwner();
+}
+function openCopilot(){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
+  document.getElementById('screen-copilot').classList.remove('hidden');
+  renderCopilot();
+}
+
+function renderHome(){
+  document.getElementById('screen-home').innerHTML = `
+    <div class="pts-card"><div><div class="l">Your points</div><div class="n">${customer.points}</div></div><button class="btn sm" onclick="goTab('rewards')">Play & earn</button></div>
+    <div class="card">
+      <div class="sec-title">Reminders</div>
+      ${bookings.length ? `<div class="notif-item"><span class="ic">&#9200;</span><div>${bookings[0].service} ${bookings[0].date}, ${bookings[0].time} with ${bookings[0].staff}</div></div>` : ''}
+      <div class="notif-item"><span class="ic">&#128197;</span><div>It's been 8 weeks since your last colouring — book a touch-up.</div></div>
+      <div class="notif-item"><span class="ic">&#10024;</span><div>Recommended facial due in 30 days.</div></div>
+    </div>
+    <div class="deal-card"><div style="font-size:11px; letter-spacing:1px; text-transform:uppercase;">Flash deal · today only</div><div class="big">2–4 PM · Hair Treatment 30% off</div><button class="btn sm" style="margin-top:8px; background:#fff;" onclick="openExtra('deals')">View deals</button></div>
+    <div class="sec-title">Quick actions</div>
+    <div class="qa-grid">
+      <div class="qa" onclick="startConsult()"><div class="ic">&#127803;</div>Beauty consultation</div>
+      <div class="qa" onclick="goTab('camera')"><div class="ic">&#128247;</div>AI try-on</div>
+      <div class="qa" onclick="openExtra('passport')"><div class="ic">&#128213;</div>Beauty passport</div>
+      <div class="qa" onclick="openExtra('journey')"><div class="ic">&#128200;</div>Beauty journey</div>
+      <div class="qa" onclick="openExtra('referral')"><div class="ic">&#127873;</div>Refer a friend</div>
+      <div class="qa" onclick="openExtra('community')"><div class="ic">&#128247;</div>Community feed</div>
+      <div class="qa" onclick="openExtra('waitlist')"><div class="ic">&#9200;</div>Waitlist</div>
+      <div class="qa" onclick="goTab('profile')"><div class="ic">&#128205;</div>Directions</div>
+    </div>
+    <div class="sec-title">Popular services</div>
+    <div class="card">${SERVICES.slice(0,3).map(s=>`<div class="svc-row"><img src="${s.img}"><div class="info"><h4>${s.name}</h4><p>${s.dur} min</p></div><div class="price">$${s.price}</div></div>`).join('')}</div>
+  `;
+}
+
+function renderBook(){
+  document.getElementById('screen-book').innerHTML = `
+    <div class="sec-title">Book an appointment</div>
+    <div class="card">
+      <label>Service</label>
+      <select id="bkService" onchange="updateCalc()">${SERVICES.map(s=>`<option value="${s.id}">${s.name} — $${s.price}</option>`).join('')}</select>
+      <label>Preferred stylist</label>
+      <select id="bkStaff">${STYLISTS.map(s=>`<option>${s.name}</option>`).join('')}<option>Any available</option></select>
+      <label>Date</label><input type="date">
+      <label>Time</label><input type="time">
+      <button class="btn dark block" onclick="confirmBooking()">Confirm booking</button>
+      <p style="font-size:11px;color:var(--muted);margin-top:8px;" id="bkMsg"></p>
+    </div>
+    <div class="sec-title">Price calculator</div>
+    <div class="card">
+      ${ADDONS.map(a=>`<label style="display:flex; align-items:center; gap:8px; text-transform:none; font-size:13px; color:var(--text); margin-bottom:8px;"><input type="checkbox" style="width:auto; margin:0;" onchange="toggleAddon('${a.id}', this.checked)"> ${a.name} (+$${a.price})</label>`).join('')}
+      <label style="display:flex; align-items:center; gap:8px; text-transform:none; font-size:13px; color:var(--text); margin-bottom:8px;"><input type="checkbox" id="memberDiscount" style="width:auto; margin:0;" onchange="updateCalc()"> Apply Gold membership (10% off)</label>
+      <div class="calc-row"><span>Service</span><span id="calcService">$0</span></div>
+      <div class="calc-row"><span>Add-ons</span><span id="calcAddons">$0</span></div>
+      <div class="calc-row"><span>Discount</span><span id="calcDiscount">$0</span></div>
+      <div class="calc-total"><span>Total</span><span id="calcTotal">$0</span></div>
+    </div>
+    <div class="sec-title">Meet the team</div>
+    <div class="card">${STYLISTS.map(s=>`<div class="stylist-card"><img src="${s.img}"><div><h4 style="font-size:14px;">${s.name}</h4><p style="font-size:12px;color:var(--muted);">${s.specialty}</p><div class="stars">${'★'.repeat(Math.round(s.rating))}${'☆'.repeat(5-Math.round(s.rating))} ${s.rating}</div>${s.reviews.map(r=>`<div class="review">"${r}"</div>`).join('')}</div></div>`).join('')}</div>
+    <div class="sec-title">All services</div>
+    <div class="card">${SERVICES.map(s=>`<div class="svc-row"><img src="${s.img}"><div class="info"><h4>${s.name}</h4><p>${s.desc}</p></div><div class="price">$${s.price}</div></div>`).join('')}</div>
+  `;
+  updateCalc();
+}
+function toggleAddon(id, checked){ if(checked) selectedAddons.push(id); else selectedAddons = selectedAddons.filter(a=>a!==id); updateCalc(); }
+function updateCalc(){
+  const svc = SERVICES.find(s=>s.id===document.getElementById('bkService').value);
+  const addonsTotal = selectedAddons.reduce((sum,id)=> sum + ADDONS.find(a=>a.id===id).price, 0);
+  const subtotal = svc.price + addonsTotal;
+  const discount = document.getElementById('memberDiscount').checked ? Math.round(subtotal*0.1) : 0;
+  document.getElementById('calcService').textContent = '$'+svc.price;
+  document.getElementById('calcAddons').textContent = '$'+addonsTotal;
+  document.getElementById('calcDiscount').textContent = '-$'+discount;
+  document.getElementById('calcTotal').textContent = '$'+(subtotal-discount);
+}
+function confirmBooking(){
+  const svc = SERVICES.find(s=>s.id===document.getElementById('bkService').value);
+  const staff = document.getElementById('bkStaff').value;
+  bookings.unshift({service:svc.name, staff, date:'upcoming', time:'confirmed', price:svc.price, status:'Pending'});
+  save('el_bookings', bookings);
+  document.getElementById('bkMsg').textContent = `Booked ${svc.name} with ${staff}. A reminder will be sent 24 hours before.`;
+  toast('Booking confirmed');
+}
+
+function renderRewards(){
+  document.getElementById('screen-rewards').innerHTML = `
+    <div class="pts-card"><div><div class="l">Your points</div><div class="n">${customer.points}</div></div></div>
+    <div class="sec-title">Beauty Crush</div>
+    <div class="card">
+      <p style="font-size:12px; color:var(--muted); margin-bottom:12px;">Swipe salon icons to match 3 or more, earn points, and unlock vouchers.</p>
+      <button class="btn dark block" onclick="openMatch3()">Play now</button>
+    </div>
+    <div class="sec-title">Daily streak</div>
+    <div class="card"><div class="streak-grid">${streak.days.map((d,i)=>`<div class="streak-day ${d?'done':''} ${i===new Date().getDay()?'today':''}">Day ${i+1}<br>${d?'✓':(i+1===7?'Voucher':(i+1)*10+'pts')}</div>`).join('')}</div><button class="btn dark block" onclick="checkInStreak()">Check in today</button></div>
+    <div class="sec-title">Redeem vouchers</div>
+    <div class="card">
+      <div class="voucher"><span>$5 off — 150 pts</span><button class="btn sm outline" onclick="redeemVoucher(150,'$5 off voucher')">Redeem</button></div>
+      <div class="voucher"><span>$10 off — 280 pts</span><button class="btn sm outline" onclick="redeemVoucher(280,'$10 off voucher')">Redeem</button></div>
+      <div class="voucher"><span>Free brow tint — 200 pts</span><button class="btn sm outline" onclick="redeemVoucher(200,'Free brow tint')">Redeem</button></div>
+    </div>
+  `;
+}
+function checkInStreak(){
+  const dayIdx = new Date().getDay();
+  if(streak.days[dayIdx]){ toast('Already checked in today'); return; }
+  streak.days[dayIdx] = true; save('el_streak', streak);
+  const pts = (dayIdx+1===7) ? 0 : (dayIdx+1)*10;
+  if(pts>0){ customer.points += pts; save('el_customer', customer); toast(`+${pts} points for checking in`); }
+  else toast('Day 7 complete — voucher unlocked!');
+  renderRewards();
+}
+function redeemVoucher(cost, label){
+  if(customer.points < cost){ toast('Not enough points yet'); return; }
+  customer.points -= cost; save('el_customer', customer);
+  toast('Voucher added: ' + label);
+  renderRewards();
+}
+
+/* ---------------- BEAUTY CRUSH GAME ---------------- */
+const ICONS = [
+  {key:'hairdryer', ic:'&#128131;', label:'Hair Dryer', cat:'Hair'},
+  {key:'lipstick', ic:'&#128132;', label:'Lipstick', cat:'Skin'},
+  {key:'polish', ic:'&#128085;', label:'Nail Polish', cat:'Nails'},
+  {key:'shampoo', ic:'&#129530;', label:'Shampoo', cat:'Hair'},
+  {key:'mask', ic:'&#127800;', label:'Facial Mask', cat:'Skin'}
+];
+const GRID_SIZE = 6;
+const MISSION_TARGET = 20;
+const MISSION_ICON = 'shampoo';
+let grid = [];
+let sessionCounts = {'hairdryer':0,'lipstick':0,'polish':0,'shampoo':0,'mask':0};
+let sessionScore = 0;
+let dragStart = null;
+
+function openMatch3(){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
+  document.getElementById('screen-match3').classList.remove('hidden');
+  sessionCounts = {'hairdryer':0,'lipstick':0,'polish':0,'shampoo':0,'mask':0};
+  sessionScore = 0;
+  initGrid();
+  renderMatch3();
+}
+function randIcon(){ return ICONS[Math.floor(Math.random()*ICONS.length)].key; }
+function initGrid(){
+  grid = [];
+  for(let i=0;i<GRID_SIZE*GRID_SIZE;i++){
+    let k;
+    do { k = randIcon(); } while(
+      (i%GRID_SIZE>=2 && grid[i-1]===k && grid[i-2]===k) ||
+      (Math.floor(i/GRID_SIZE)>=2 && grid[i-GRID_SIZE]===k && grid[i-GRID_SIZE*2]===k)
+    );
+    grid.push(k);
+  }
+}
+function iconOf(key){ return ICONS.find(i=>i.key===key); }
+function renderMatch3(){
+  const el = document.getElementById('screen-match3');
+  const missionProgress = Math.min(matchStats[MISSION_ICON], MISSION_TARGET);
+  el.innerHTML = `
+    <div class="back-row" onclick="goTab('rewards')"><span class="arrow">&#8592;</span><span class="title">Beauty Crush</span></div>
+    <div class="card">
+      <div class="mission-bar"><span>Mission: match ${MISSION_TARGET} shampoos &#129530;</span><span>${missionProgress}/${MISSION_TARGET}</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${(missionProgress/MISSION_TARGET)*100}%;"></div></div>
+      ${missionProgress>=MISSION_TARGET ? `<div class="voucher" style="background:#fbf3e3; border-color:var(--gold);"><span>Mission complete!</span><span style="color:var(--gold-dark); font-weight:600;">10% Hair Spa Voucher</span></div>` : ''}
+      <p style="font-size:12px; color:var(--muted); margin-top:6px;">Session score: <strong style="color:var(--text);">${sessionScore}</strong></p>
+    </div>
+    <div class="card">
+      <p style="font-size:11px; color:var(--muted); margin-bottom:8px;">Swipe a tile toward a neighbor to swap and match 3+.</p>
+      <div class="match3-grid" id="match3Grid"></div>
+      <div class="match-counts">${ICONS.map(i=>`<div><span class="cnt">${sessionCounts[i.key]}</span>${i.label.split(' ')[0]}</div>`).join('')}</div>
+      <button class="btn dark block" onclick="endMatch3Session()">End session & get recommendation</button>
+    </div>
+  `;
+  drawGrid();
+}
+function drawGrid(){
+  const gridEl = document.getElementById('match3Grid');
+  gridEl.innerHTML = grid.map((key,i)=>`<div class="tile" data-i="${i}" onpointerdown="tileDown(event,${i})">${iconOf(key).ic}</div>`).join('');
+  gridEl.onpointerup = tileUp;
+  gridEl.onpointercancel = ()=>{ dragStart = null; };
+}
+function tileDown(e, i){
+  dragStart = {index:i, x:e.clientX, y:e.clientY};
+  e.target.classList.add('dragging');
+}
+function tileUp(e){
+  if(!dragStart) return;
+  document.querySelectorAll('.tile.dragging').forEach(t=>t.classList.remove('dragging'));
+  const dx = e.clientX - dragStart.x;
+  const dy = e.clientY - dragStart.y;
+  if(Math.abs(dx) < 15 && Math.abs(dy) < 15){ dragStart = null; return; }
+  const row = Math.floor(dragStart.index / GRID_SIZE);
+  const col = dragStart.index % GRID_SIZE;
+  let target = null;
+  if(Math.abs(dx) > Math.abs(dy)){
+    if(dx > 0 && col < GRID_SIZE-1) target = dragStart.index + 1;
+    else if(dx < 0 && col > 0) target = dragStart.index - 1;
+  } else {
+    if(dy > 0 && row < GRID_SIZE-1) target = dragStart.index + GRID_SIZE;
+    else if(dy < 0 && row > 0) target = dragStart.index - GRID_SIZE;
+  }
+  const startIndex = dragStart.index;
+  dragStart = null;
+  if(target !== null) trySwap(startIndex, target);
+}
+function swapTiles(a,b){ const tmp = grid[a]; grid[a] = grid[b]; grid[b] = tmp; }
+function trySwap(a,b){
+  swapTiles(a,b);
+  const matches = findMatches();
+  if(matches.size===0){
+    swapTiles(a,b);
+    drawGrid();
+    return;
+  }
+  processMatches();
+}
+function findMatches(){
+  const matched = new Set();
+  for(let r=0;r<GRID_SIZE;r++){
+    for(let c=0;c<GRID_SIZE-2;c++){
+      const i = r*GRID_SIZE+c;
+      if(grid[i] && grid[i]===grid[i+1] && grid[i]===grid[i+2]){
+        matched.add(i); matched.add(i+1); matched.add(i+2);
+      }
+    }
+  }
+  for(let c=0;c<GRID_SIZE;c++){
+    for(let r=0;r<GRID_SIZE-2;r++){
+      const i = r*GRID_SIZE+c;
+      if(grid[i] && grid[i]===grid[i+GRID_SIZE] && grid[i]===grid[i+GRID_SIZE*2]){
+        matched.add(i); matched.add(i+GRID_SIZE); matched.add(i+GRID_SIZE*2);
+      }
+    }
+  }
+  return matched;
+}
+function processMatches(){
+  let matches = findMatches();
+  let totalCleared = 0;
+  while(matches.size>0){
+    matches.forEach(i=>{
+      sessionCounts[grid[i]]++;
+      matchStats[grid[i]]++;
+      totalCleared++;
+      grid[i] = null;
+    });
+    for(let c=0;c<GRID_SIZE;c++){
+      let col = [];
+      for(let r=0;r<GRID_SIZE;r++){ if(grid[r*GRID_SIZE+c]!==null) col.push(grid[r*GRID_SIZE+c]); }
+      while(col.length<GRID_SIZE) col.unshift(randIcon());
+      for(let r=0;r<GRID_SIZE;r++){ grid[r*GRID_SIZE+c] = col[r]; }
+    }
+    matches = findMatches();
+  }
+  sessionScore += totalCleared * 5;
+  customer.points += totalCleared * 2;
+  save('el_customer', customer);
+  save('el_matchstats', matchStats);
+  if(totalCleared>0) toast(`+${totalCleared*2} points`);
+  renderMatch3();
+}
+function endMatch3Session(){
+  const dominant = Object.entries(sessionCounts).sort((a,b)=>b[1]-a[1])[0];
+  const totalMatched = Object.values(sessionCounts).reduce((a,b)=>a+b,0);
+  let rec = "Play a round to get a personalised recommendation!";
+  if(totalMatched>0){
+    const cat = iconOf(dominant[0]).cat;
+    if(cat==='Hair') rec = `We noticed you enjoy exploring hair-related rewards. Based on your matches, we recommend our Keratin Hair Treatment. Book this week and enjoy an additional 10% discount.`;
+    if(cat==='Skin') rec = `Your rewards suggest you're interested in facials and skincare. Here's a personalised Hydrating Facial package, just for you.`;
+    if(cat==='Nails') rec = `Looks like nails are your thing! Try our Gel Manicure with a complimentary nail art upgrade this week.`;
+  }
+  document.getElementById('screen-match3').innerHTML = `
+    <div class="back-row" onclick="goTab('rewards')"><span class="arrow">&#8592;</span><span class="title">Session complete</span></div>
+    <div class="card" style="text-align:center;">
+      <p style="font-size:13px; color:var(--muted); margin-bottom:6px;">Congratulations! You matched</p>
+      <div style="font-size:26px; font-weight:600; color:var(--plum); margin-bottom:10px;">${totalMatched} beauty products</div>
+      <div class="match-counts">${ICONS.map(i=>`<div><span class="cnt">${sessionCounts[i.key]}</span>${i.label.split(' ')[0]}</div>`).join('')}</div>
+    </div>
+    <div class="ai-recbox">
+      <div style="color:var(--gold); font-size:11px; text-transform:uppercase; letter-spacing:1px; margin-bottom:6px;">AI recommendation</div>
+      <p>${rec}</p>
+    </div>
+    <button class="btn dark block" style="margin-top:14px;" onclick="goTab('book')">Book now</button>
+    <button class="btn outline block" style="margin-top:10px;" onclick="goTab('rewards')">Back to rewards</button>
+  `;
+}
+
+let camMode = 'nails';
+function renderCamera(){
+  document.getElementById('screen-camera').innerHTML = `
+    <div class="sec-title">AI outcome preview</div>
+    <div style="display:flex; gap:8px; margin-bottom:12px;">
+      <span class="pill ${camMode==='nails'?'active':''}" onclick="setCamMode('nails')">Nails</span>
+      <span class="pill ${camMode==='hair'?'active':''}" onclick="setCamMode('hair')">Hair</span>
+    </div>
+    <div class="cam-frame">
+      <img src="${camMode==='nails' ? 'https://images.unsplash.com/photo-1604654894610-df63bc536371?w=400&q=80' : 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&q=80'}" id="camImg">
+      <div class="cam-overlay" id="camOverlay"></div>
+    </div>
+    <div class="card">
+      <p style="font-size:12px; color:var(--muted); margin-bottom:10px;">Choose a ${camMode==='nails'?'polish colour':'hair colour'} to preview:</p>
+      <div id="swatchRow"></div>
+      <button class="btn dark block" style="margin-top:12px;" onclick="showPreview()">Preview outcome</button>
+    </div>
+    <p style="font-size:11px;color:var(--muted); margin-top:8px;">Simulated preview for course demo purposes — not a live camera AI model.</p>
+  `;
+  renderSwatchRow();
+}
+function setCamMode(m){ camMode = m; renderCamera(); }
+function renderSwatchRow(){
+  const list = camMode==='nails' ? NAIL_COLOURS : HAIR_COLOURS;
+  document.getElementById('swatchRow').innerHTML = list.map((c,i)=>`<span class="swatch ${i===0?'active':''}" style="background:${c.h};" onclick="pickSwatch(this,'${c.n}')"></span>`).join('');
+}
+function pickSwatch(el,name){ document.querySelectorAll('.swatch').forEach(s=>s.classList.remove('active')); el.classList.add('active'); el.dataset.name=name; }
+function showPreview(){
+  const img = document.getElementById('camImg');
+  img.style.filter = 'saturate(1.6) contrast(1.08) brightness(0.96)';
+  const overlay = document.getElementById('camOverlay');
+  if(camMode==='nails'){
+    overlay.innerHTML = `<div class="metric-row"><span>Finish</span><span>Glossy gel</span></div><div class="metric-row"><span>Estimated wear</span><span>2–3 weeks</span></div><div class="metric-row"><span>Colour match confidence</span><span>${88+Math.floor(Math.random()*8)}%</span></div>`;
+  } else {
+    overlay.innerHTML = `<div class="metric-row"><span>Tone match to skin</span><span>${82+Math.floor(Math.random()*10)}%</span></div><div class="metric-row"><span>Upkeep</span><span>Touch-up in 6–8 weeks</span></div><div class="metric-row"><span>Recommended add-on</span><span>Gloss treatment</span></div>`;
+  }
+  overlay.classList.add('show');
+  setTimeout(()=>{ img.style.filter=''; }, 900);
+}
+
+function renderProfile(){
+  const mapQuery = encodeURIComponent(SHOP_ADDRESS);
+  document.getElementById('screen-profile').innerHTML = `
+    <div class="card">
+      <div class="sec-title">Notifications</div>
+      <div class="notif-item"><span class="ic">&#9200;</span><div>Appointment reminders<br><span style="color:var(--muted);">24 hours before each visit</span></div><div class="toggle ${notifSettings.reminders?'on':''}" onclick="toggleNotif('reminders')" style="margin-left:auto;"><div class="dot"></div></div></div>
+      <div class="notif-item"><span class="ic">&#127873;</span><div>Promotions and rewards<br><span style="color:var(--muted);">Points, vouchers, offers</span></div><div class="toggle ${notifSettings.promos?'on':''}" onclick="toggleNotif('promos')" style="margin-left:auto;"><div class="dot"></div></div></div>
+    </div>
+    <div class="sec-title">Ways to get there</div>
+    <div class="card">
+      <iframe class="map-embed" loading="lazy" src="https://www.google.com/maps?q=${mapQuery}&output=embed"></iframe>
+      <div class="addr-row"><p style="font-size:12px; flex:1;">${SHOP_ADDRESS}</p><button class="btn sm outline" onclick="copyAddress()">Copy</button></div>
+      <p style="font-size:11px; color:var(--muted); margin-bottom:10px;">Nearest MRT: Woodlands (10 min walk) • Bus 856, 858, 911 stop outside • Basement parking available</p>
+      <div style="display:flex; gap:8px;"><a class="btn dark" style="flex:1; text-align:center;" href="https://www.google.com/maps/dir/?api=1&destination=${mapQuery}" target="_blank" rel="noopener">Get directions</a><button class="btn outline" style="flex:1;" onclick="shareLocation()">Share</button></div>
+    </div>
+    <div class="sec-title">Membership</div>
+    <div class="card"><p style="font-size:13px;">${customer.membership} member • ${customer.points} points</p></div>
+    <div class="sec-title">Staff & owner</div>
+    <div class="card"><button class="btn outline block" onclick="openOwner()">Open owner portal</button></div>
+  `;
+}
+function toggleNotif(key){ notifSettings[key] = !notifSettings[key]; save('el_notif', notifSettings); toast(notifSettings[key] ? 'Notifications on' : 'Notifications off'); renderProfile(); }
+function copyAddress(){ navigator.clipboard.writeText(SHOP_ADDRESS).then(()=>toast('Address copied')).catch(()=>toast('Copy not supported here')); }
+function shareLocation(){
+  const url = 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(SHOP_ADDRESS);
+  if(navigator.share){ navigator.share({title:'E.Layer', text:'Find us here', url}).catch(()=>{}); }
+  else { navigator.clipboard.writeText(url).then(()=>toast('Directions link copied')); }
+}
+
+function startConsult(){ consultCategory=null; consultAnswers={}; consultStep=0; openExtra('consult'); }
+function chooseConsultCat(cat){
+  consultCategory = cat;
+  consultSteps = CONSULT[cat].concat(LIFESTYLE.slice(0,3)).concat([STRESS_Q]).concat([LIFESTYLE[3]]);
+  consultStep = 0;
+  renderExtra('consult');
+}
+function answerConsult(key, val){ consultAnswers[key] = val; consultStep++; renderExtra('consult'); }
+function answerStars(n){ consultAnswers.stress = n; consultStep++; renderExtra('consult'); }
+function generateRecommendation(){
+  const cat = consultCategory;
+  let mainConcern, recMap, primary;
+  if(cat==='hair'){ mainConcern=consultAnswers.concern; recMap=HAIR_REC; }
+  if(cat==='skin'){ mainConcern=consultAnswers.concern; recMap=SKIN_REC; }
+  if(cat==='nail'){ mainConcern=consultAnswers.goal; recMap=NAIL_REC; }
+  if(cat==='spa'){ mainConcern=consultAnswers.reason; recMap=SPA_REC; }
+  primary = recMap[mainConcern] || 'Consultation with a specialist';
+  let lifestyleNotes = [];
+  if(consultAnswers.sleep==='Less than 5' || consultAnswers.stress>=4) lifestyleNotes.push('Low sleep and higher stress can affect skin and scalp health — consider adding a relaxation-focused treatment.');
+  if(consultAnswers.outdoors==='Yes') lifestyleNotes.push('Frequent sun exposure means hydration and SPF-supportive treatments are worth prioritising.');
+  if(consultAnswers.allergy && consultAnswers.allergy!=='None') lifestyleNotes.push(`Noted allergy to ${consultAnswers.allergy.toLowerCase()} — staff will use alternative products.`);
+  return `
+    <div class="card">
+      <div class="sec-title">Your personalised plan</div>
+      <p style="font-size:13px; margin-bottom:8px;"><strong>Main focus:</strong> ${mainConcern}</p>
+      <p style="font-size:13px; margin-bottom:8px;"><strong>Recommended service:</strong> ${primary}</p>
+      ${lifestyleNotes.length ? `<p style="font-size:12px; color:var(--muted); margin-top:10px;">${lifestyleNotes.join(' ')}</p>` : ''}
+      <button class="btn dark block" style="margin-top:14px;" onclick="goTab('book')">Book this service</button>
+      <p style="font-size:10px; color:var(--muted); margin-top:10px;">This is a rule-based recommendation from your answers, not a medical assessment.</p>
+    </div>`;
+}
+
+function renderExtra(which){
+  const el = document.getElementById('screen-extra');
+  if(which==='consult'){
+    if(!consultCategory){
+      el.innerHTML = `
+        <div class="back-row" onclick="goTab('home')"><span class="arrow">&#8592;</span><span class="title">Beauty consultation</span></div>
+        <p style="font-size:12px; color:var(--muted); margin-bottom:14px;">Choose a category to get a personalised recommendation.</p>
+        <div class="qa-grid">
+          <div class="cat-tile" onclick="chooseConsultCat('hair')"><div class="ic">&#127803;</div>Hair</div>
+          <div class="cat-tile" onclick="chooseConsultCat('skin')"><div class="ic">&#10024;</div>Skin</div>
+          <div class="cat-tile" onclick="chooseConsultCat('nail')"><div class="ic">&#128131;</div>Nails</div>
+          <div class="cat-tile" onclick="chooseConsultCat('spa')"><div class="ic">&#128167;</div>Spa</div>
+        </div>`;
+      return;
+    }
+    if(consultStep >= consultSteps.length){
+      el.innerHTML = `<div class="back-row" onclick="goTab('home')"><span class="arrow">&#8592;</span><span class="title">Your plan</span></div>` + generateRecommendation();
+      return;
+    }
+    const step = consultSteps[consultStep];
+    const pct = Math.round((consultStep/consultSteps.length)*100);
+    if(step.key==='stress'){
+      el.innerHTML = `
+        <div class="back-row" onclick="goTab('home')"><span class="arrow">&#8592;</span><span class="title">Consultation</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;"></div></div>
+        <div class="card"><p style="font-size:14px; margin-bottom:14px;">${step.q}</p>
+          <div class="star-select">${[1,2,3,4,5].map(n=>`<span data-n="${n}" onclick="answerStars(${n})">★</span>`).join('')}</div>
+        </div>`;
+      return;
+    }
+    el.innerHTML = `
+      <div class="back-row" onclick="goTab('home')"><span class="arrow">&#8592;</span><span class="title">Consultation</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;"></div></div>
+      <div class="card">
+        <p style="font-size:14px; margin-bottom:14px;">${step.q}</p>
+        ${step.opts.map(o=>`<div class="opt-row" onclick="answerConsult('${step.key}','${o.replace(/'/g,"\\'")}')">${o}</div>`).join('')}
+      </div>`;
+    return;
+  }
+  if(which==='passport'){
+    const doneCount = Object.values(passportStamps).filter(Boolean).length;
+    el.innerHTML = `
+      <div class="back-row" onclick="goTab('home')"><span class="arrow">&#8592;</span><span class="title">Beauty passport</span></div>
+      <div class="card"><p style="font-size:12px; color:var(--muted); margin-bottom:12px;">Complete stamps to unlock badges and vouchers.</p>
+        <div class="stamp-grid">${PASSPORT_STAMPS.map(s=>`<div class="stamp ${passportStamps[s.key]?'done':''}"><span class="ic">${s.ic}</span>${s.key}</div>`).join('')}</div>
+        ${doneCount>=4 ? `<div class="card" style="margin-top:14px; background:#fbf3e3; border-color:var(--gold);"><strong>Beauty Explorer Badge unlocked!</strong><p style="font-size:12px; margin-top:4px;">Claim a free facial mask or 10% voucher next visit.</p></div>` : `<p style="font-size:11px; color:var(--muted); margin-top:12px;">${doneCount}/6 stamps — collect 4 to unlock the Beauty Explorer Badge.</p>`}
+      </div>`;
+  }
+  if(which==='journey'){
+    el.innerHTML = `<div class="back-row" onclick="goTab('home')"><span class="arrow">&#8592;</span><span class="title">Beauty journey</span></div>
+      <div class="card"><div class="timeline">${JOURNEY.map(j=>`<div class="tl-item"><div class="tl-date">${j.date}</div><div class="tl-title">${j.title}</div><div class="tl-note">${j.note}</div></div>`).join('')}</div></div>
+      <p style="font-size:11px; color:var(--muted);">Staff upload progress photos with your permission after each visit.</p>`;
+  }
+  if(which==='referral'){
+    el.innerHTML = `<div class="back-row" onclick="goTab('home')"><span class="arrow">&#8592;</span><span class="title">Refer a friend</span></div>
+      <div class="card"><p style="font-size:12px; color:var(--muted); margin-bottom:10px;">Share your code — your friend gets 20% off, you get 200 points.</p><div class="ref-code">${customer.referralCode}</div><button class="btn dark block" onclick="shareReferral()">Share code</button></div>`;
+  }
+  if(which==='deals'){
+    el.innerHTML = `<div class="back-row" onclick="goTab('home')"><span class="arrow">&#8592;</span><span class="title">Flash deals</span></div>
+      <div class="deal-card"><div style="font-size:11px; text-transform:uppercase;">2PM–4PM · today only</div><div class="big">Hair Treatment — 30% off</div></div>
+      <p style="font-size:11px; color:var(--muted);">Flash deals fill quieter appointment slots — check back daily for new ones.</p>`;
+  }
+  if(which==='community'){
+    el.innerHTML = `<div class="back-row" onclick="goTab('home')"><span class="arrow">&#8592;</span><span class="title">Community feed</span></div>
+      ${feedState.map((p,i)=>`<div class="feed-post"><strong style="font-size:13px;">${p.name}</strong><img src="${p.img}"><p style="font-size:12px; margin-bottom:6px;">${p.caption}</p><div class="feed-actions"><span class="${p.liked?'liked':''}" onclick="toggleLike(${i})">&#9829; ${p.likes}</span><span>&#128172; Comment</span></div></div>`).join('')}`;
+  }
+  if(which==='waitlist'){
+    el.innerHTML = `<div class="back-row" onclick="goTab('home')"><span class="arrow">&#8592;</span><span class="title">Waitlist</span></div>
+      <div class="card">${WAITLIST_SLOTS.map((s,i)=>`<div class="wait-row"><span>${s.service} — ${s.time}</span>${s.full ? (waitlisted.includes(i) ? '<span style="color:var(--success); font-size:11px;">On waitlist</span>' : `<button class="btn sm outline" onclick="joinWaitlist(${i})">Join</button>`) : '<span style="color:var(--success); font-size:11px;">Available</span>'}</div>`).join('')}</div>`;
+  }
+}
+function shareReferral(){
+  const text = `Use my code ${customer.referralCode} at E.Layer for 20% off your first visit!`;
+  if(navigator.share){ navigator.share({title:'E.Layer referral', text}).catch(()=>{}); }
+  else { navigator.clipboard.writeText(text).then(()=>toast('Referral message copied')); }
+}
+function toggleLike(i){ feedState[i].liked = !feedState[i].liked; feedState[i].likes += feedState[i].liked?1:-1; save('el_feed', feedState); openExtra('community'); }
+function joinWaitlist(i){ waitlisted.push(i); save('el_waitlist', waitlisted); toast("You'll be notified if a slot opens"); openExtra('waitlist'); }
+
+function renderOwner(){
+  const el = document.getElementById('screen-owner');
+  if(!staffLoggedIn){
+    el.innerHTML = `<div class="back-row" onclick="goTab('profile')"><span class="arrow">&#8592;</span><span class="title">Owner portal</span></div>
+      <div class="card"><label>Password</label><input type="password" id="ownerPw" placeholder="Hint: owner123"><button class="btn dark block" onclick="ownerLogin()">Log in</button></div>`;
+    return;
+  }
+  const revenue = bookings.reduce((s,b)=> s + (b.status!=='Cancelled'?(b.price||0):0), 0);
+  const cancelled = bookings.filter(b=>b.status==='Cancelled').length;
+  const cancelRate = bookings.length ? Math.round((cancelled/bookings.length)*100) : 0;
+  const svcCounts = {};
+  bookings.forEach(b=> svcCounts[b.service] = (svcCounts[b.service]||0)+1);
+  const topService = Object.keys(svcCounts).length ? Object.entries(svcCounts).sort((a,b)=>b[1]-a[1])[0][0] : SERVICES[0].name;
+  const stylistCounts = {};
+  bookings.forEach(b=> stylistCounts[b.staff] = (stylistCounts[b.staff]||0)+1);
+  const topStylist = Object.keys(stylistCounts).length ? Object.entries(stylistCounts).sort((a,b)=>b[1]-a[1])[0][0] : STYLISTS[0].name;
+
+  el.innerHTML = `
+    <div class="back-row" onclick="goTab('profile')"><span class="arrow">&#8592;</span><span class="title">Owner portal</span></div>
+
+    <div class="card" style="background:linear-gradient(135deg,#2c1e2f,#4a3350); border:none;">
+      <div style="color:var(--gold); font-size:11px; letter-spacing:1px; text-transform:uppercase; margin-bottom:6px;">New</div>
+      <p style="color:#fff; font-size:14px; margin-bottom:10px;">Your AI Business Copilot has a morning briefing ready.</p>
+      <button class="btn block" onclick="openCopilot()">Open copilot</button>
+    </div>
+
+    <div class="sec-title">Business dashboard</div>
+    <div class="qa-grid">
+      <div class="metric-tile"><div class="n">${bookings.length}</div><div class="l">Daily bookings</div></div>
+      <div class="metric-tile"><div class="n">$${revenue}</div><div class="l">Revenue</div></div>
+      <div class="metric-tile"><div class="n">${cancelRate}%</div><div class="l">Cancellation rate</div></div>
+      <div class="metric-tile"><div class="n">64%</div><div class="l">Customer retention</div></div>
+    </div>
+    <div class="card">
+      <div class="sec-title">Peak booking hours</div>
+      ${[['10–12 PM',35],['12–2 PM',55],['2–4 PM',80],['4–6 PM',60]].map(r=>`<div class="bar-row"><span style="width:56px;">${r[0]}</span><div class="bar-track"><div class="bar-fill" style="width:${r[1]}%;"></div></div><span>${r[1]}%</span></div>`).join('')}
+      <p style="font-size:12px; margin-top:10px;"><strong>Most booked service:</strong> ${topService}</p>
+      <p style="font-size:12px;"><strong>Most popular stylist:</strong> ${topStylist}</p>
+    </div>
+
+    <div class="sec-title">Inventory alerts</div>
+    <div class="card"><table><thead><tr><th>Item</th><th>Stock</th><th>Status</th></tr></thead><tbody>
+      ${inventory.map(i=>`<tr><td>${i.item}</td><td>${i.stock}</td><td class="${i.stock<i.min?'low':'ok'}">${i.stock<i.min?'Reorder now':'OK'}</td></tr>`).join('')}
+    </tbody></table></div>
+
+    <div class="sec-title">Customer insights</div>
+    <div class="card">
+      <p style="font-size:12px; margin-bottom:6px;"><strong>Most frequent customers:</strong> Emily R., Daniel K., Priya S.</p>
+      <p style="font-size:12px; margin-bottom:6px;"><strong>Haven't visited in 90+ days:</strong> Marcus T., Wei Ling</p>
+      <p style="font-size:12px; margin-bottom:6px;"><strong>Most redeemed voucher:</strong> $5 off (150 pts)</p>
+      <p style="font-size:12px;"><strong>Average spend per visit:</strong> $86</p>
+    </div>
+    <div class="card"><button class="btn outline block" onclick="staffLoggedIn=false; renderOwner();">Log out</button></div>
+  `;
+}
+function ownerLogin(){
+  const v = document.getElementById('ownerPw').value;
+  if(v===STAFF_PASSWORD){ staffLoggedIn=true; renderOwner(); toast('Welcome back'); }
+  else toast('Incorrect password');
+}
+
+function renderCopilot(){
+  const d = COPILOT_DATA;
+  document.getElementById('screen-copilot').innerHTML = `
+    <div class="back-row" onclick="openOwner()"><span class="arrow">&#8592;</span><span class="title">AI business copilot</span></div>
+
+    <div class="card" style="background:linear-gradient(135deg,#2c1e2f,#4a3350); border:none; color:#fff;">
+      <p style="color:var(--gold); font-size:12px; margin-bottom:8px;">Good morning</p>
+      <p style="font-size:13px; margin-bottom:10px;">Yesterday: ${d.briefing.completed} appointments completed, revenue up ${d.briefing.revenueChange}%, ${d.briefing.topService} were most popular. ${d.briefing.churnCount} customers are likely to stop returning.</p>
+      <p style="color:var(--gold); font-size:12px; margin-bottom:6px;">Today's recommendations</p>
+      <ul style="font-size:12px; padding-left:16px; line-height:1.6;">
+        <li>Offer a flash discount ${d.briefing.flashSuggestion}</li>
+        <li>Order more ${d.briefing.lowStock}</li>
+        <li>Reply to ${d.briefing.reviewFlag}</li>
+        <li>Feature ${d.briefing.trend} in your next post</li>
+        <li>Send a personalised voucher to ${d.briefing.loyalCount} loyal customers who haven't visited in over two months</li>
+      </ul>
+    </div>
+
+    <div class="sec-title">Business health score</div>
+    <div class="card">
+      <div style="text-align:center; margin-bottom:12px;"><div style="font-size:32px; font-weight:600; color:var(--plum);">${d.health.overall}<span style="font-size:14px; color:var(--muted);">/100</span></div></div>
+      ${d.health.breakdown.map(b=>`<div class="bar-row"><span style="width:110px;">${b[0]}</span><div class="bar-track"><div class="bar-fill" style="width:${b[1]}%;"></div></div><span>${b[1]}</span></div>`).join('')}
+      <p style="font-size:12px; margin-top:8px; color:var(--muted);">${d.health.weakest} is your weakest area — try posting 3 TikTok videos a week and launching a referral campaign.</p>
+    </div>
+
+    <div class="sec-title">Promotion generator</div>
+    <div class="card">
+      <label>Business goal</label>
+      <select id="promoGoal"><option>Increase weekday bookings</option><option>Increase new customers</option><option>Sell more nail packages</option></select>
+      <button class="btn dark block" onclick="generatePromo()">Generate promotion</button>
+      <div id="promoOutput" style="font-size:12px; margin-top:12px; color:var(--muted);"></div>
+    </div>
+
+    <div class="sec-title">Customers likely to leave</div>
+    <div class="card">
+      ${d.churnList.map(c=>`<div class="wait-row" style="display:block; padding:10px 0;"><div style="display:flex; justify-content:space-between;"><strong style="font-size:13px;">${c.name}</strong><span class="low">${c.pct}% likely to leave</span></div><p style="font-size:11px; color:var(--muted); margin:4px 0;">${c.reason}</p><button class="btn sm outline" onclick="toast('Voucher sent to ${c.name}')">${c.action}</button></div>`).join('')}
+    </div>
+
+    <div class="sec-title">Revenue forecast</div>
+    <div class="card">
+      <div class="qa-grid">
+        <div class="metric-tile"><div class="n">$${d.revenueForecast.current.toLocaleString()}</div><div class="l">This month</div></div>
+        <div class="metric-tile"><div class="n">$${d.revenueForecast.predicted.toLocaleString()}</div><div class="l">Predicted next month</div></div>
+      </div>
+      <p style="font-size:12px; margin-top:10px;"><strong>Confidence:</strong> ${d.revenueForecast.confidence}%</p>
+      <p style="font-size:12px; color:var(--muted);">${d.revenueForecast.reason}</p>
+    </div>
+
+    <div class="sec-title">Review analysis</div>
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span style="font-size:13px;">${d.reviews.total} reviews analysed</span><span class="ok" style="font-weight:600;">${d.reviews.positive}% positive</span></div>
+      <p style="font-size:12px; margin-bottom:4px;"><strong>Praised most:</strong> ${d.reviews.posThemes.join(', ')}</p>
+      <p style="font-size:12px; margin-bottom:8px;"><strong>Raised most:</strong> ${d.reviews.negThemes.join(', ')}</p>
+      <p style="font-size:12px; color:var(--muted);">Suggested action: ${d.reviews.action}</p>
+    </div>
+
+    <div class="sec-title">Trending now</div>
+    <div class="card">${d.trends.map(t=>`<div class="wait-row"><span>${t.item}</span><span class="ok">${t.change}</span></div>`).join('')}</div>
+    <p style="font-size:10px; color:var(--muted); margin-bottom:20px;">All insights on this screen are simulated for demo purposes — a live version would need real booking, review, and social data connected to an analysis model.</p>
+  `;
+}
+function generatePromo(){
+  const goal = document.getElementById('promoGoal').value;
+  const promos = {
+    'Increase weekday bookings': {name:'Tuesday Glow Special', detail:'20% off facials between 2–5 PM', expected:'+15 bookings/week', caption:'Beat the midweek slump — 20% off facials this Tuesday only ✨'},
+    'Increase new customers': {name:'First Visit Welcome', detail:'15% off for first-time customers', expected:'+12% new customers', caption:'New here? Your first visit is 15% off — book today.'},
+    'Sell more nail packages': {name:'Chrome & Care Package', detail:'Chrome nails + hand treatment bundle', expected:'+9 package bookings/week', caption:'Chrome nails are trending — get the full package this week.'}
+  };
+  const p = promos[goal];
+  document.getElementById('promoOutput').innerHTML = `<strong style="color:var(--text); font-size:13px;">${p.name}</strong><br>${p.detail}<br>Expected increase: ${p.expected}<br><br><em>Suggested caption:</em> "${p.caption}"`;
+}
+
+const hr = new Date().getHours();
+document.getElementById('greetTime').textContent = hr<12?'Good morning':hr<18?'Good afternoon':'Good evening';
+renderHome();
+</script>
+</body>
+</html>
